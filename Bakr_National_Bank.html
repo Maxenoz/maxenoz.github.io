@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bakr National Bank</title>
+<style>
+body{font-family:Arial,sans-serif;background:#0f172a;color:white;margin:0}
+header{background:#1e293b;padding:20px;text-align:center}
+.container{max-width:900px;margin:auto;padding:20px}
+.card{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:20px}
+input,button{padding:10px;margin:5px;border:none;border-radius:6px}
+button{background:#22c55e;color:white;cursor:pointer}
+.balance{font-size:32px;color:gold}
+.log{max-height:200px;overflow-y:auto;background:#0f172a;padding:10px;border-radius:8px}
+</style>
+</head>
+<body>
+<header>
+<h1>🏦 Bakr National Bank</h1>
+<p>Secure Banking for Bakr (BKR)</p>
+</header>
+<div class="container">
+<div class="card">
+<h2>Create Account</h2>
+<input id="newUser" placeholder="Username">
+<button onclick="createAccount()">Create</button>
+</div>
+<div class="card">
+<h2>Login</h2>
+<input id="loginUser" placeholder="Username">
+<button onclick="login()">Login</button>
+</div>
+<div class="card" id="bankPanel" style="display:none;">
+<h2 id="welcome"></h2>
+<p>Balance:</p>
+<div class="balance" id="balance">0 BKR</div>
+<h3>Transfer BKR</h3>
+<input id="receiver" placeholder="Receiver Username">
+<input id="amount" type="number" placeholder="Amount">
+<button onclick="transfer()">Send</button>
+<h3>Transaction Log</h3>
+<div class="log" id="log"></div>
+</div>
+</div>
+<script>
+let currentUser=null;
+function getAccounts(){return JSON.parse(localStorage.getItem("bkr_accounts")||"{}");}
+function saveAccounts(accounts){localStorage.setItem("bkr_accounts",JSON.stringify(accounts));}
+function createAccount(){
+let username=document.getElementById("newUser").value.trim();
+if(!username){alert("Enter username");return;}
+let accounts=getAccounts();
+if(accounts[username]){alert("Account already exists");return;}
+accounts[username]={balance:1000,transactions:["Account created (+1000 BKR)"]};
+saveAccounts(accounts);
+alert("Account created! Starting balance: 1000 BKR");
+}
+function login(){
+let username=document.getElementById("loginUser").value.trim();
+let accounts=getAccounts();
+if(!accounts[username]){alert("Account not found");return;}
+currentUser=username;
+document.getElementById("bankPanel").style.display="block";
+refresh();
+}
+function refresh(){
+let accounts=getAccounts();
+let acc=accounts[currentUser];
+document.getElementById("welcome").innerText="Welcome, "+currentUser;
+document.getElementById("balance").innerText=acc.balance.toLocaleString()+" BKR";
+document.getElementById("log").innerHTML=acc.transactions.slice().reverse().join("<br>");
+}
+function transfer(){
+let to=document.getElementById("receiver").value.trim();
+let amount=Number(document.getElementById("amount").value);
+let accounts=getAccounts();
+if(!accounts[to]){alert("Receiver not found");return;}
+if(to===currentUser){alert("Cannot send to yourself");return;}
+if(amount<=0){alert("Invalid amount");return;}
+if(accounts[currentUser].balance<amount){alert("Insufficient funds");return;}
+accounts[currentUser].balance-=amount;
+accounts[to].balance+=amount;
+let date=new Date().toLocaleString();
+accounts[currentUser].transactions.push(`Sent ${amount} BKR to ${to} (${date})`);
+accounts[to].transactions.push(`Received ${amount} BKR from ${currentUser} (${date})`);
+saveAccounts(accounts);
+refresh();
+alert("Transfer successful");
+}
+</script>
+</body>
+</html>
