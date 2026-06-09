@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media Platform</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#111;
+    color:white;
+}
+
+header{
+    background:#202020;
+    padding:15px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.search-container{
+    padding:15px;
+    background:#181818;
+}
+
+#search{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#2a2a2a;
+    color:white;
+    font-size:16px;
+}
+
+.categories{
+    display:flex;
+    gap:10px;
+    padding:15px;
+    overflow-x:auto;
+    background:#181818;
+}
+
+.category{
+    background:#2a2a2a;
+    padding:8px 15px;
+    border-radius:20px;
+    cursor:pointer;
+    white-space:nowrap;
+}
+
+.category:hover{
+    background:#444;
+}
+
+.container{
+    display:flex;
+    flex-wrap:wrap;
+}
+
+.player-section{
+    flex:2;
+    min-width:350px;
+    padding:20px;
+}
+
+.library{
+    flex:1;
+    min-width:300px;
+    max-height:80vh;
+    overflow-y:auto;
+    border-left:1px solid #333;
+}
+
+video{
+    width:100%;
+    border-radius:12px;
+    background:black;
+}
+
+.video-title{
+    margin-top:15px;
+    font-size:24px;
+}
+
+.video-description{
+    color:#ccc;
+    margin-top:8px;
+}
+
+.video-card{
+    display:flex;
+    gap:10px;
+    padding:10px;
+    border-bottom:1px solid #333;
+    cursor:pointer;
+}
+
+.video-card:hover{
+    background:#222;
+}
+
+.video-card img{
+    width:140px;
+    height:80px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+.card-info{
+    flex:1;
+}
+
+.card-title{
+    font-weight:bold;
+    margin-bottom:5px;
+}
+</style>
+</head>
+<body>
+
+<header>
+🎬 Media Platform
+</header>
+
+<div class="search-container">
+    <input type="text" id="search" placeholder="Search videos...">
+</div>
+
+<div class="categories">
+    <div class="category" onclick="filterCategory('All')">All</div>
+    <div class="category" onclick="filterCategory('Nature')">Nature</div>
+    <div class="category" onclick="filterCategory('Animals')">Animals</div>
+    <div class="category" onclick="filterCategory('Travel')">Travel</div>
+</div>
+
+<div class="container">
+
+    <div class="player-section">
+        <video id="player" controls>
+            <source src="">
+        </video>
+
+        <div class="video-title" id="title">
+            Select a video
+        </div>
+
+        <div class="video-description" id="description">
+            Choose a video from the library.
+        </div>
+    </div>
+
+    <div class="library" id="library">
+    </div>
+
+</div>
+
+<script>
+
+const videos = [
+
+{
+title:"Flowers",
+description:"Beautiful flower footage.",
+category:"Nature",
+thumbnail:"https://picsum.photos/id/292/300/180",
+video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+},
+
+{
+title:"Big Buck Bunny",
+description:"Animated short film.",
+category:"Animals",
+thumbnail:"https://picsum.photos/id/237/300/180",
+video:"https://www.w3schools.com/html/mov_bbb.mp4"
+},
+
+{
+title:"Mountain Trip",
+description:"Travel adventure.",
+category:"Travel",
+thumbnail:"https://picsum.photos/id/1018/300/180",
+video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+}
+
+];
+
+let currentCategory = "All";
+
+function loadVideo(video){
+    document.getElementById("player").src = video.video;
+    document.getElementById("title").textContent = video.title;
+    document.getElementById("description").textContent = video.description;
+}
+
+function renderVideos(){
+
+    const search =
+        document.getElementById("search")
+        .value
+        .toLowerCase();
+
+    const library =
+        document.getElementById("library");
+
+    library.innerHTML = "";
+
+    videos
+    .filter(video =>
+        (currentCategory === "All" ||
+        video.category === currentCategory)
+        &&
+        video.title.toLowerCase().includes(search)
+    )
+    .forEach(video => {
+
+        const card =
+        document.createElement("div");
+
+        card.className = "video-card";
+
+        card.innerHTML = `
+        <img src="${video.thumbnail}">
+        <div class="card-info">
+            <div class="card-title">${video.title}</div>
+            <div>${video.category}</div>
+        </div>
+        `;
+
+        card.onclick = () => loadVideo(video);
+
+        library.appendChild(card);
+    });
+}
+
+function filterCategory(category){
+    currentCategory = category;
+    renderVideos();
+}
+
+document
+.getElementById("search")
+.addEventListener("input", renderVideos);
+
+renderVideos();
+
+</script>
+
+</body>
+</html>
