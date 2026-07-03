@@ -57,7 +57,12 @@
             "bye": "Catch you on the flip side!",
             "help": "Type a keyword in the URL to see magic.",
             "pizza": "Did someone say pizza? 🍕",
-            "meow": "Are you a furry?"
+            "meow": "Are you a furry?",
+            "what": "The Brain (this info hub) is an... info hub which the AI you're chatting with uses right now",
+            "brain": "What do you mean? the human brain?",
+            "transformers": "Hugging Face Transformers are HF AI tools to use when running HF things in Python, for example.",
+            "hf": "Hugging Face is an AI-oriented GitHub-style platform with models, datasets, organisations, and spaces.",
+            "huggingface": "Yes."
         };
 
         // 3. Process the input
@@ -71,7 +76,7 @@
                 subElement.textContent = `Recognized keyword: "${queryText}"`;
             } else {
                 // Default fallback if they type a word not in the dictionary
-                outputElement.textContent = queryText;
+                outputElement.textContent = "sorry :)";
                 subElement.textContent = `You passed: "?q=${encodeURIComponent(queryText)}"`;
             }
         } else {
