@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Brain - an answers hub</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 80%;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 1rem 0;
+            color: #2563eb;
+        }
+        p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 id="output-text">Loading...</h1>
+        <p id="sub-text">Reading data from the URL parameter.</p>
+    </div>
+
+    <script>
+        // 1. Get the current URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryText = urlParams.get('q');
+        
+        const outputElement = document.getElementById('output-text');
+        const subElement = document.getElementById('sub-text');
+
+        // 2. THE DICTIONARY: Easily add your custom keywords and replies here!
+        // Make sure keywords are entirely lowercase.
+        const responses = {
+            "hello": "hi, how are you?",
+            "yo": "Sup! What's crackin'?",
+            "bye": "Catch you on the flip side!",
+            "help": "Type a keyword in the URL to see magic.",
+            "pizza": "Did someone say pizza? 🍕",
+            "meow": "Are you a furry?"
+        };
+
+        // 3. Process the input
+        if (queryText) {
+            // Convert to lowercase so "Yo", "YO", and "yo" all match
+            const cleanQuery = queryText.toLowerCase();
+
+            // Check if the word exists in our dictionary
+            if (responses[cleanQuery]) {
+                outputElement.textContent = responses[cleanQuery];
+                subElement.textContent = `Recognized keyword: "${queryText}"`;
+            } else {
+                // Default fallback if they type a word not in the dictionary
+                outputElement.textContent = queryText;
+                subElement.textContent = `You passed: "?q=${encodeURIComponent(queryText)}"`;
+            }
+        } else {
+            // Default fallback if there is no "?q=" in the URL at all
+            outputElement.textContent = "Hello, World!";
+            subElement.textContent = "Try adding '?q=yo' or '?q=hello' to the end of the URL.";
+        }
+    </script>
+
+</body>
+</html>
