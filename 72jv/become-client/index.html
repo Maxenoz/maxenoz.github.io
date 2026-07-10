@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Become a 72jv Client</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    color:white;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:30px;
+}
+
+.container{
+    width:100%;
+    max-width:800px;
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(15px);
+    border-radius:24px;
+    padding:40px;
+    box-shadow:0 20px 40px rgba(0,0,0,.25);
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+p{
+    opacity:.9;
+    margin-bottom:30px;
+}
+
+label{
+    display:block;
+    margin-top:18px;
+    margin-bottom:6px;
+    font-weight:600;
+}
+
+input, textarea, select{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+}
+
+textarea{
+    resize:vertical;
+    min-height:120px;
+}
+
+button{
+    margin-top:30px;
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:14px;
+    background:white;
+    color:#2563eb;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+footer{
+    text-align:center;
+    margin-top:25px;
+    opacity:.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Become a 72jv Client</h1>
+
+<p>
+Fill out the application below. When you submit it, your email app will open with all the information ready to send.
+</p>
+
+<form id="clientForm">
+
+<label>Organisation name</label>
+<input id="organisation">
+
+<label>* Your name and surname</label>
+<input id="name" required>
+
+<label>Your role in the organisation</label>
+<input id="role">
+
+<label>* Why do you need 72jv?</label>
+<textarea id="reason" required></textarea>
+
+<label>Additional text</label>
+<textarea id="extra"></textarea>
+
+<label>* Do you need your own folder?</label>
+<select id="folder">
+<option>No</option>
+<option>Yes</option>
+</select>
+
+<button type="submit">
+Submit Application
+</button>
+
+</form>
+
+<footer>
+© 2026 Maxenoz Mega
+</footer>
+
+</div>
+
+<script>
+document.getElementById("clientForm").addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const organisation=document.getElementById("organisation").value||"Individual";
+const name=document.getElementById("name").value;
+const role=document.getElementById("role").value||"Not specified";
+const reason=document.getElementById("reason").value;
+const extra=document.getElementById("extra").value||"None";
+const folder=document.getElementById("folder").value;
+
+const subject=`72jv Client Service: order by ${name} from ${organisation}`;
+
+const body=
+`72jv CLIENT APPLICATION
+
+Organisation:
+${organisation}
+
+Applicant:
+${name}
+
+Role:
+${role}
+
+Reason for requesting 72jv:
+${reason}
+
+Needs a dedicated folder?
+${folder}
+
+Additional text:
+${extra}
+
+---------------------------------
+Generated from the 72jv website.`;
+
+window.location.href=
+`mailto:maxenoznm@icloud.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+});
+</script>
+
+</body>
+</html>
