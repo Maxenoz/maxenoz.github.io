@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IodizedSaltLM</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <button id="newChatButton" class="new-chat">
+            + New Chat
+        </button>
+
+        <div id="chatHistory" class="chat-history">
+            <!-- Previous chats appear here -->
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <!-- Header -->
+        <header class="header">
+
+            <div class="header-center">
+
+                <h1 class="logo">IodizedSaltLM</h1>
+
+                <select id="modelSelector">
+                    <option selected>
+                        IodizedSaltLM-Alpha-nano
+                    </option>
+                </select>
+
+            </div>
+
+        </header>
+
+        <!-- Chat -->
+        <section id="chatArea" class="chat-area">
+
+            <div class="welcome-message">
+                <h2>What are we doing now??</h2>
+                <p>Start a conversation below.</p>
+            </div>
+
+        </section>
+
+        <!-- Input -->
+        <form id="chatForm" class="chat-input-container">
+
+            <div class="chat-input">
+
+                <textarea
+                    id="messageInput"
+                    placeholder="Message IodizedSaltLM..."
+                    rows="1"
+                    autocomplete="off"
+                    spellcheck="true"
+                    required
+                ></textarea>
+
+                <button
+                    id="sendButton"
+                    type="submit"
+                    aria-label="Send"
+                >
+                    ➜
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
