@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Бакырджи Вики</title>
+
+<style>
+body{
+    margin:0;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:#f8f9fa;
+    color:#202122;
+}
+
+header{
+    background:#ffffff;
+    border-bottom:1px solid #dadde3;
+    padding:20px;
+    text-align:center;
+}
+
+h1{
+    margin:0;
+    font-size:42px;
+}
+
+.subtitle{
+    color:#54595d;
+    margin-top:8px;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:30px;
+}
+
+.search-box{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:35px 0;
+}
+
+.search-box input{
+    width:600px;
+    max-width:100%;
+    padding:14px;
+    font-size:18px;
+    border:1px solid #a2a9b1;
+    border-radius:8px;
+}
+
+.search-box button{
+    padding:14px 24px;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    background:#3366cc;
+    color:white;
+    cursor:pointer;
+}
+
+.search-box button:hover{
+    background:#2a4b9b;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:white;
+    border:1px solid #dadde3;
+    border-radius:10px;
+    padding:20px;
+}
+
+.card h2{
+    margin-top:0;
+}
+
+footer{
+    margin-top:40px;
+    text-align:center;
+    color:#72777d;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Бакырджи Вики</h1>
+    <div class="subtitle">
+        Официальная энциклопедия про Бакырджи.
+    </div>
+</header>
+
+<div class="container">
+
+<form class="search-box"
+      action="https://maxenoz.github.io/bkwiki/search/"
+      method="GET">
+
+    <input
+        type="search"
+        name="q"
+        placeholder="Искать в Бакырджи Вики..."
+        autocomplete="off"
+        required>
+
+    <button type="submit">Искать</button>
+</form>
+
+<div class="grid">
+
+<div class="card">
+<h2>📖 Добро пожаловать</h2>
+<p>
+Добро пожаловать в Бакырджи Вики, официальную эницклопедию
+про Бакырджи. Здесь Вы можете узнавать официальные данные
+про Бакырджи.
+</p>
+</div>
+
+<div class="card">
+<h2>⭐ Featured Article</h2>
+<p>
+Every day, a different article can be featured here to highlight interesting
+topics from the wiki.
+</p>
+</div>
+
+<div class="card">
+<h2>🆕 Recently Added</h2>
+<p>
+Discover the newest pages and the latest additions to the encyclopedia.
+</p>
+</div>
+
+<div class="card">
+<h2>🎲 Random Article</h2>
+<p>
+Feeling lucky? Visit a random article and learn something new today.
+</p>
+</div>
+
+</div>
+
+<footer>
+    © 202 • Powered by Maxenoz
+</footer>
+
+</div>
+
+</body>
+</html>
