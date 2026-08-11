@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Maxenoz Search</title>
+
+  <meta
+    name="description"
+    content="Search the Maxenoz web index."
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      background: #ffffff;
+      color: #202124;
+    }
+
+    .page {
+      width: min(900px, 92%);
+      margin: 0 auto;
+      padding-top: 14vh;
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 46px;
+      font-weight: 700;
+      letter-spacing: -2px;
+      margin-bottom: 28px;
+    }
+
+    .logo span {
+      font-weight: 400;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+
+      width: 100%;
+
+      border: 1px solid #dfe1e5;
+      border-radius: 30px;
+
+      padding: 4px 7px 4px 18px;
+
+      box-shadow:
+        0 1px 6px rgba(32, 33, 36, 0.12);
+
+      transition:
+        box-shadow 0.15s,
+        border-color 0.15s;
+    }
+
+    .search-box:focus-within {
+      border-color: transparent;
+
+      box-shadow:
+        0 1px 10px rgba(32, 33, 36, 0.22);
+    }
+
+    .search-icon {
+      font-size: 20px;
+      opacity: 0.55;
+      margin-right: 10px;
+    }
+
+    #searchInput {
+      flex: 1;
+
+      min-width: 0;
+
+      border: 0;
+      outline: 0;
+
+      font-size: 18px;
+
+      padding: 12px 0;
+
+      background: transparent;
+      color: inherit;
+    }
+
+    #searchButton {
+      border: 0;
+
+      background: #202124;
+      color: white;
+
+      border-radius: 24px;
+
+      padding: 11px 20px;
+
+      font-size: 15px;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    #searchButton:hover {
+      opacity: 0.9;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 18px;
+
+      color: #70757a;
+      font-size: 14px;
+    }
+
+    #results {
+      margin-top: 50px;
+    }
+
+    .result {
+      margin-bottom: 30px;
+    }
+
+    .result-title {
+      display: block;
+
+      color: #1a0dab;
+
+      font-size: 20px;
+
+      text-decoration: none;
+
+      margin-bottom: 3px;
+    }
+
+    .result-title:hover {
+      text-decoration: underline;
+    }
+
+    .result-url {
+      color: #188038;
+
+      font-size: 14px;
+
+      word-break: break-all;
+
+      margin-bottom: 5px;
+    }
+
+    .result-snippet {
+      color: #4d5156;
+
+      line-height: 1.5;
+
+      margin: 0;
+    }
+
+    .empty {
+      text-align: center;
+
+      color: #70757a;
+
+      padding: 40px 10px;
+    }
+
+    .loader {
+      text-align: center;
+
+      font-size: 15px;
+
+      color: #70757a;
+    }
+
+    .footer {
+      text-align: center;
+
+      margin-top: 80px;
+      padding-bottom: 30px;
+
+      color: #9aa0a6;
+
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+
+      .page {
+        padding-top: 8vh;
+      }
+
+      .logo {
+        font-size: 38px;
+      }
+
+      .search-box {
+        padding-left: 14px;
+      }
+
+      #searchInput {
+        font-size: 16px;
+      }
+
+      #searchButton {
+        padding: 10px 14px;
+      }
+
+      #results {
+        margin-top: 35px;
+      }
+
+      .result-title {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <div class="logo">
+      Maxenoz<span>Search</span>
+    </div>
+
+    <form
+      id="searchForm"
+      class="search-box"
+    >
+
+      <span class="search-icon">
+        🔎
+      </span>
+
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Search the web"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search"
+      >
+
+      <button
+        id="searchButton"
+        type="submit"
+      >
+        Search
+      </button>
+
+    </form>
+
+    <div
+      id="status"
+      class="status"
+    >
+      Search the Maxenoz index
+    </div>
+
+    <section
+      id="results"
+      aria-live="polite"
+    ></section>
+
+    <footer class="footer">
+      Maxenoz Search
+    </footer>
+
+  </main>
+
+
+  <script>
+
+    const API =
+      "https://search.maxenoz.workers.dev";
+
+    const form =
+      document.getElementById(
+        "searchForm"
+      );
+
+    const input =
+      document.getElementById(
+        "searchInput"
+      );
+
+    const results =
+      document.getElementById(
+        "results"
+      );
+
+    const status =
+      document.getElementById(
+        "status"
+      );
+
+
+    // =========================================
+    // SEARCH
+    // =========================================
+
+    form.addEventListener(
+      "submit",
+      async function (event) {
+
+        event.preventDefault();
+
+        const query =
+          input.value.trim();
+
+        if (!query) {
+          input.focus();
+          return;
+        }
+
+        // Put query in URL
+        const pageUrl =
+          new URL(
+            window.location.href
+          );
+
+        pageUrl.searchParams.set(
+          "q",
+          query
+        );
+
+        history.pushState(
+          {},
+          "",
+          pageUrl
+        );
+
+        await search(query);
+      }
+    );
+
+
+    async function search(query) {
+
+      results.innerHTML = "";
+
+      status.textContent =
+        "Searching...";
+
+      try {
+
+        const response =
+          await fetch(
+            API +
+            "/search?q=" +
+            encodeURIComponent(
+              query
+            )
+          );
+
+        if (!response.ok) {
+
+          throw new Error(
+            "HTTP " +
+            response.status
+          );
+        }
+
+        const data =
+          await response.json();
+
+        displayResults(
+          data,
+          query
+        );
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+        status.textContent =
+          "Search failed.";
+
+        results.innerHTML = `
+          <div class="empty">
+            Unable to connect to
+            Maxenoz Search.
+          </div>
+        `;
+      }
+    }
+
+
+    // =========================================
+    // DISPLAY RESULTS
+    // =========================================
+
+    function displayResults(
+      data,
+      query
+    ) {
+
+      results.innerHTML = "";
+
+      if (
+        !Array.isArray(data) ||
+        data.length === 0
+      ) {
+
+        status.textContent =
+          `No results for "${query}"`;
+
+        results.innerHTML = `
+          <div class="empty">
+            No indexed pages matched
+            your search.
+          </div>
+        `;
+
+        return;
+      }
+
+      status.textContent =
+        `${data.length} result${
+          data.length === 1
+            ? ""
+            : "s"
+        }`;
+
+      for (
+        const item of data
+      ) {
+
+        const result =
+          document.createElement(
+            "article"
+          );
+
+        result.className =
+          "result";
+
+
+        const title =
+          document.createElement(
+            "a"
+          );
+
+        title.className =
+          "result-title";
+
+        title.href =
+          item.url;
+
+        title.target =
+          "_blank";
+
+        title.rel =
+          "noopener noreferrer";
+
+        title.textContent =
+          item.title ||
+          item.url;
+
+
+        const url =
+          document.createElement(
+            "div"
+          );
+
+        url.className =
+          "result-url";
+
+        url.textContent =
+          item.url;
+
+
+        const snippet =
+          document.createElement(
+            "p"
+          );
+
+        snippet.className =
+          "result-snippet";
+
+        snippet.textContent =
+          item.snippet ||
+          "No description available.";
+
+
+        result.appendChild(
+          title
+        );
+
+        result.appendChild(
+          url
+        );
+
+        result.appendChild(
+          snippet
+        );
+
+        results.appendChild(
+          result
+        );
+      }
+    }
+
+
+    // =========================================
+    // LOAD ?q= FROM URL
+    // =========================================
+
+    function loadQuery() {
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+      const query =
+        params.get("q");
+
+      if (query) {
+
+        input.value =
+          query;
+
+        search(query);
+      }
+    }
+
+
+    // Browser back/forward
+    window.addEventListener(
+      "popstate",
+      loadQuery
+    );
+
+
+    loadQuery();
+
+  </script>
+
+</body>
+</html>
