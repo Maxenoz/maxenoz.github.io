@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JJWare -- modern tech for anything</title>
+    <style>
+        /* Base Reset */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f4f7f6; 
+            color: #333; 
+        }
+
+        /* Header & Navigation */
+        header { 
+            background-color: #1a1a1a; 
+            color: #fff; 
+            padding: 1rem 5%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .logo { 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            letter-spacing: 1px; 
+            color: #00d2ff; 
+            text-decoration: none; 
+        }
+        .search-container { 
+            flex-grow: 1; 
+            display: flex; 
+            justify-content: center; 
+        }
+        .search-container form { 
+            display: flex; 
+            width: 100%; 
+            max-width: 500px; 
+        }
+        .search-container input { 
+            width: 100%; 
+            padding: 0.6rem 1rem; 
+            border: none; 
+            border-radius: 4px 0 0 4px; 
+            outline: none; 
+            font-size: 1rem;
+        }
+        .search-container button { 
+            padding: 0.6rem 1.2rem; 
+            border: none; 
+            background-color: #00d2ff; 
+            color: #1a1a1a; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 0 4px 4px 0; 
+            transition: background-color 0.2s ease;
+        }
+        .search-container button:hover { background-color: #00b8e6; }
+        
+        /* Hero Section */
+        .hero { 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            color: white; 
+            padding: 4rem 5%; 
+            text-align: center; 
+        }
+        .hero h1 { font-size: 2.8rem; margin-bottom: 1rem; }
+        .hero p { font-size: 1.2rem; opacity: 0.9; }
+
+        /* Shared Grid Layout */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 2rem; 
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card { 
+            background: #fff; 
+            border-radius: 8px; 
+            padding: 1.5rem; 
+            text-align: center; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        }
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
+        }
+        .card h3 { margin: 1rem 0 0.5rem; color: #1a1a1a; }
+        .card p { color: #666; margin-bottom: 1rem; font-size: 0.95rem; }
+        .card .price { font-size: 1.4rem; font-weight: bold; color: #2a5298; }
+
+        /* Featured Flagman Projects */
+        .featured-flagman { padding: 4rem 5%; }
+        .featured-flagman h2 { text-align: center; margin-bottom: 2.5rem; font-size: 2.2rem; color: #1a1a1a; }
+        .badge { 
+            display: inline-block; 
+            background-color: #ff3b30; 
+            color: white; 
+            padding: 0.3rem 0.6rem; 
+            border-radius: 4px; 
+            font-size: 0.8rem; 
+            font-weight: bold; 
+            text-transform: uppercase;
+        }
+
+        /* Shop Section & Category Switcher */
+        .shop-section { padding: 3rem 5%; background-color: #fff; }
+        .category-switcher { 
+            display: flex; 
+            justify-content: center; 
+            gap: 1rem; 
+            margin-bottom: 3rem; 
+            flex-wrap: wrap; 
+        }
+        .category-switcher button { 
+            padding: 0.6rem 1.5rem; 
+            border: 2px solid #1a1a1a; 
+            background: transparent; 
+            cursor: pointer; 
+            border-radius: 30px; 
+            font-weight: 600; 
+            transition: all 0.2s ease; 
+            font-size: 1rem;
+        }
+        .category-switcher button.active, 
+        .category-switcher button:hover { 
+            background: #1a1a1a; 
+            color: #fff; 
+        }
+        
+        .product-item { display: none; }
+        .product-item.active { display: block; animation: fadeIn 0.4s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Footer */
+        footer { 
+            background: #1a1a1a; 
+            color: #888; 
+            text-align: center; 
+            padding: 2rem; 
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="#" class="logo">JJWare</a>
+    <div class="search-container">
+        <!-- Search form redirects to /search/ using standard GET method -->
+        <form action="/search/" method="GET">
+            <input type="text" name="q" placeholder="Search laptops, phones, headphones..." required aria-label="Search">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</header>
+
+<section class="hero">
+    <h1>Welcome to JJWare</h1>
+    <p>Maxenoz Mega's modern tech for everything, for the AI era</p>
+</section>
+
+<!-- Featured Flagman Section -->
+<section class="featured-flagman">
+    <h2>Featured Flagman Projects</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="badge">Flagman</span>
+            <h3>JJComp OmniZ 7</h3>
+            <p>Our top-tier laptop ideal for complex workflows, AI testing, 3D graphics in 5K, and more with the Z7 UPU.</p>
+            <div class="price">1,000 bakr</div>
+        </div>
+        <div class="card">
+            <span class="badge">Flagman</span>
+            <h3>JJPhone Life 3</h3>
+            <p>Titanium chassis, 5K video capture, and everything for a blogged..</p>
+            <div class="price">250 bakr</div>
+        </div>
+        <div class="card">
+            <span class="badge">Flagman</span>
+            <h3>JJComp Work 5</h3>
+            <p>Classic JJComp office vibes.</p>
+            <div class="price">500 bakr</div>
+        </div>
+    </div>
+</section>
+
+<!-- Shop Catalog Section with Dynamic Filtering -->
+<section class="shop-section">
+    <div class="category-switcher" id="categoryTabs">
+        <button class="active" data-target="all">All Products</button>
+        <button data-target="laptops">Laptops</button>
+        <button data-target="phones">Phones</button>
+        <button data-target="headphones">Headphones</button>
+    </div>
+
+    <div class="grid" id="productGrid">
+        <!-- Laptops -->
+        <div class="card product-item active laptops all">
+            <h3>ForgeBook Air</h3>
+            <p>Featherlight chassis with all-day battery life for everyday tasks.</p>
+            <div class="price">$899</div>
+        </div>
+        <div class="card product-item active laptops all">
+            <h3>ForgeBook Creator</h3>
+            <p>Color-accurate OLED display built for designers.</p>
+            <div class="price">$1,699</div>
+        </div>
+
+        <!-- Phones -->
+        <div class="card product-item active phones all">
+            <h3>ForgePhone 14</h3>
+            <p>The standard of excellence, perfected for daily use.</p>
+            <div class="price">$799</div>
+        </div>
+        <div class="card product-item active phones all">
+            <h3>ForgePhone Fold</h3>
+            <p>Expand your workspace with our premium foldable display.</p>
+            <div class="price">$1,499</div>
+        </div>
+
+        <!-- Headphones -->
+        <div class="card product-item active headphones all">
+            <h3>ForgeBuds Sport</h3>
+            <p>Sweat-resistant true wireless earbuds with secure fit.</p>
+            <div class="price">$149</div>
+        </div>
+        <div class="card product-item active headphones all">
+            <h3>AudioForge Core</h3>
+            <p>Wired, high-fidelity sound for pure audiophile listening.</p>
+            <div class="price">$199</div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; 2026 ByteForge. All rights reserved.</p>
+</footer>
+
+<script>
+    // Logic for handling the category switching system
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('.category-switcher button');
+        const products = document.querySelectorAll('.product-item');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active state from all buttons
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Set the clicked button to active
+                tab.classList.add('active');
+
+                // Get the target category
+                const targetCategory = tab.getAttribute('data-target');
+
+                // Toggle visibility of products based on the selected category
+                products.forEach(product => {
+                    if (targetCategory === 'all' || product.classList.contains(targetCategory)) {
+                        product.classList.add('active');
+                    } else {
+                        product.classList.remove('active');
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
