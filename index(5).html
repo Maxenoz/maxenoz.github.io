@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BakrBank Loan Calculator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f7f5;
+      color: #17231c;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: white;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.08);
+    }
+    .brand {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #4f745d;
+      margin-bottom: 6px;
+    }
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    .subtitle { margin: 0 0 28px; color: #68736c; }
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 9px;
+    }
+    .amount-row, .period-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    input, select {
+      width: 100%;
+      border: 1px solid #d7ded9;
+      border-radius: 12px;
+      padding: 13px 14px;
+      font-size: 16px;
+      background: #fff;
+      color: #17231c;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #5d8a6d; }
+    .amount-input { flex: 1; }
+    .unit {
+      font-weight: 800;
+      min-width: 48px;
+    }
+    input[type="range"] {
+      padding: 0;
+      margin: 14px 0 28px;
+      accent-color: #4f745d;
+    }
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #7a847e;
+      margin-top: -20px;
+      margin-bottom: 24px;
+    }
+    .result {
+      margin-top: 26px;
+      background: #eef5f0;
+      border-radius: 18px;
+      padding: 20px;
+    }
+    .rate {
+      font-size: 46px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .rate-label { color: #607066; }
+    .details {
+      margin-top: 18px;
+      border-top: 1px solid #d8e3dc;
+      padding-top: 14px;
+    }
+    .line {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 7px 0;
+    }
+    .line span:first-child { color: #68736c; }
+    .line strong { text-align: right; }
+    .total {
+      font-size: 19px;
+      margin-top: 4px;
+    }
+    .note {
+      margin-top: 18px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #7a847e;
+    }
+    .error {
+      color: #a33b3b;
+      font-size: 13px;
+      margin-top: 7px;
+      min-height: 18px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand">BakrBank</div>
+    <h1>Loan Calculator</h1>
+    <p class="subtitle">Calculate your BakrBank loan rate and repayment.</p>
+
+    <label for="amount">Loan amount</label>
+    <div class="amount-row">
+      <input id="amount" class="amount-input" type="number" min="10" max="1000" step="1" value="500">
+      <span class="unit">BKR</span>
+    </div>
+    <input id="amountRange" type="range" min="10" max="1000" step="1" value="500">
+    <div class="range-labels"><span>10 BKR</span><span>1,000 BKR</span></div>
+    <div id="amountError" class="error"></div>
+
+    <label for="periodValue">Loan period</label>
+    <div class="period-row">
+      <input id="periodValue" type="number" min="24" value="720" step="1">
+      <select id="periodUnit">
+        <option value="hours">Hours</option>
+        <option value="days" selected>Days</option>
+        <option value="months">Months</option>
+      </select>
+    </div>
+    <div id="periodError" class="error"></div>
+
+    <section class="result">
+      <div class="rate" id="rate">30.00%</div>
+      <div class="rate-label">Loan percentage</div>
+
+      <div class="details">
+        <div class="line">
+          <span>Loan amount</span>
+          <strong id="loanAmount">500.00 BKR</strong>
+        </div>
+        <div class="line">
+          <span>Interest</span>
+          <strong id="interest">150.00 BKR</strong>
+        </div>
+        <div class="line total">
+          <span>Total repayment</span>
+          <strong id="total">650.00 BKR</strong>
+        </div>
+      </div>
+    </section>
+
+    <div class="note">
+      Rate range: 20%–45%. Minimum period: 24 hours. Maximum period:
+      3 months (treated as 90 days / 2,160 hours).
+    </div>
+  </main>
+
+  <script>
+    const MIN_AMOUNT = 10;
+    const MAX_AMOUNT = 1000;
+    const MIN_HOURS = 24;
+    const MAX_HOURS = 2160;
+    const MIN_RATE = 20;
+    const MAX_RATE = 45;
+
+    const amount = document.getElementById("amount");
+    const amountRange = document.getElementById("amountRange");
+    const periodValue = document.getElementById("periodValue");
+    const periodUnit = document.getElementById("periodUnit");
+
+    const amountError = document.getElementById("amountError");
+    const periodError = document.getElementById("periodError");
+
+    const rateEl = document.getElementById("rate");
+    const loanAmountEl = document.getElementById("loanAmount");
+    const interestEl = document.getElementById("interest");
+    const totalEl = document.getElementById("total");
+
+    function toHours(value, unit) {
+      if (unit === "hours") return value;
+      if (unit === "days") return value * 24;
+      return value * 30 * 24;
+    }
+
+    function formatBKR(value) {
+      return value.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + " BKR";
+    }
+
+    function calculate() {
+      let loan = Number(amount.value);
+      let rawPeriod = Number(periodValue.value);
+      let hours = toHours(rawPeriod, periodUnit.value);
+
+      amountError.textContent = "";
+      periodError.textContent = "";
+
+      if (!Number.isFinite(loan)) loan = MIN_AMOUNT;
+      if (!Number.isFinite(rawPeriod)) rawPeriod = 1;
+
+      loan = Math.max(MIN_AMOUNT, Math.min(MAX_AMOUNT, loan));
+      amount.value = loan;
+      amountRange.value = loan;
+
+      if (hours < MIN_HOURS) {
+        periodError.textContent = "Minimum loan period is 24 hours.";
+      } else if (hours > MAX_HOURS) {
+        periodError.textContent = "Maximum loan period is 3 months.";
+      }
+
+      const clampedHours = Math.max(MIN_HOURS, Math.min(MAX_HOURS, hours));
+
+      // Larger loans reduce the percentage.
+      const valueFactor =
+        (MAX_AMOUNT - loan) / (MAX_AMOUNT - MIN_AMOUNT);
+
+      // Longer periods increase the percentage.
+      const periodFactor =
+        (clampedHours - MIN_HOURS) / (MAX_HOURS - MIN_HOURS);
+
+      // Equal weighting between loan value and loan period.
+      let rate =
+        MIN_RATE +
+        (MAX_RATE - MIN_RATE) *
+        (0.5 * valueFactor + 0.5 * periodFactor);
+
+      rate = Math.max(MIN_RATE, Math.min(MAX_RATE, rate));
+
+      const interest = loan * rate / 100;
+      const total = loan + interest;
+
+      rateEl.textContent = rate.toFixed(2) + "%";
+      loanAmountEl.textContent = formatBKR(loan);
+      interestEl.textContent = formatBKR(interest);
+      totalEl.textContent = formatBKR(total);
+    }
+
+    amount.addEventListener("input", () => {
+      amountRange.value = amount.value;
+      calculate();
+    });
+
+    amountRange.addEventListener("input", () => {
+      amount.value = amountRange.value;
+      calculate();
+    });
+
+    periodValue.addEventListener("input", calculate);
+    periodUnit.addEventListener("change", calculate);
+
+    calculate();
+  </script>
+</body>
+</html>
