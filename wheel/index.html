@@ -1,0 +1,1389 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Random Wheel</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #111;
+        color: white;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    .app {
+        width: min(100%, 900px);
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #aaa;
+        margin-top: 0;
+    }
+
+    .wheel-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 25px 0;
+    }
+
+    .wheel-container {
+        position: relative;
+        width: min(85vw, 500px);
+        aspect-ratio: 1;
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        border-radius: 50%;
+        box-shadow: 0 0 30px #000;
+    }
+
+    .pointer {
+        position: absolute;
+        top: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 18px solid transparent;
+        border-right: 18px solid transparent;
+        border-top: 35px solid white;
+        z-index: 2;
+        filter: drop-shadow(0 2px 3px #000);
+    }
+
+    button {
+        border: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        font-size: 16px;
+        cursor: pointer;
+        background: #fff;
+        color: #111;
+        font-weight: bold;
+    }
+
+    button:hover {
+        opacity: 0.85;
+    }
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    #spin {
+        margin-top: 20px;
+        font-size: 20px;
+        padding: 15px 35px;
+    }
+
+    .panel {
+        background: #1c1c1c;
+        border-radius: 15px;
+        padding: 18px;
+    }
+
+    .entry {
+        display: grid;
+        grid-template-columns: 45px 1fr 100px 45px;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .entry input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 8px;
+        background: #111;
+        color: white;
+        font-size: 15px;
+    }
+
+    .entry input[type="color"] {
+        height: 40px;
+        padding: 3px;
+    }
+
+    .remove {
+        background: #d33;
+        color: white;
+        padding: 9px;
+    }
+
+    .add {
+        background: #2d8cff;
+        color: white;
+        margin-top: 5px;
+    }
+
+    .percentage {
+        text-align: center;
+        color: #aaa;
+        margin: 15px 0;
+    }
+
+    #winner {
+        margin-top: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        min-height: 40px;
+    }
+
+    .hint {
+        color: #888;
+        font-size: 13px;
+        text-align: center;
+        margin-top: 15px;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+        .entry {
+            grid-template-columns: 40px 1fr 75px 40px;
+        }
+
+        .entry input {
+            font-size: 13px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>🎡 Crypto Random Wheel</h1>
+    <p class="subtitle">Powered by crypto.getRandomValues()</p>
+
+    <div class="wheel-area">
+
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheel"></canvas>
+        </div>
+
+        <button id="spin">SPIN</button>
+
+        <div id="winner"></div>
+    </div>
+
+    <div class="panel">
+
+        <h2>Wheel Settings</h2>
+
+        <div id="entries"></div>
+
+        <div class="percentage">
+            Total weight: <strong id="total">0</strong>
+        </div>
+
+        <button class="add" id="add">＋ Add Entry</button>
+
+        <p class="hint">
+            Weight controls probability.<br>
+            If no entries have a positive weight, all entries have roughly equal probability.
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+
+const entriesDiv = document.getElementById("entries");
+const totalDisplay = document.getElementById("total");
+const winnerDisplay = document.getElementById("winner");
+const spinButton = document.getElementById("spin");
+
+let entries = [
+    { name: "Apple", weight: 25, color: "#ff595e" },
+    { name: "Banana", weight: 25, color: "#ffca3a" },
+    { name: "Grape", weight: 25, color: "#8ac926" },
+    { name: "Orange", weight: 25, color: "#1982c4" }
+];
+
+let rotation = 0;
+let spinning = false;
+
+
+/*
+    ==================================================
+    CRYPTO RANDOMNESS
+    ==================================================
+
+    Returns a cryptographically random floating point
+    number in [0, 1).
+
+    crypto.getRandomValues() supplies the random bytes.
+*/
+function cryptoRandom() {
+
+    const array = new Uint32Array(1);
+
+    crypto.getRandomValues(array);
+
+    return array[0] / 4294967296;
+}
+
+
+/*
+    ==================================================
+    CRYPTO RANDOM INTEGER
+    ==================================================
+
+    Returns a crypto-random integer from 0 to max - 1.
+
+    Rejection sampling is used to avoid modulo bias.
+*/
+function cryptoRandomInt(max) {
+
+    if (!Number.isInteger(max) || max <= 0) {
+        throw new Error("max must be a positive integer");
+    }
+
+    const MAX_UINT32 = 4294967296;
+
+    const limit =
+        Math.floor(MAX_UINT32 / max) * max;
+
+    while (true) {
+
+        const array = new Uint32Array(1);
+
+        crypto.getRandomValues(array);
+
+        const value = array[0];
+
+        if (value < limit) {
+            return value % max;
+        }
+    }
+}
+
+
+/*
+    ==================================================
+    WEIGHTED RANDOM WINNER
+    ==================================================
+
+    Rules:
+
+    1. If there are positive weights:
+       use the weights.
+
+    2. If EVERY weight is blank, zero, or invalid:
+       every entry gets roughly equal probability.
+
+    Example:
+
+        A = 10
+        B = 30
+        C = 60
+
+        A ≈ 10%
+        B ≈ 30%
+        C ≈ 60%
+
+    With no weights:
+
+        A ≈ 33.3%
+        B ≈ 33.3%
+        C ≈ 33.3%
+*/
+function chooseWinner() {
+
+    /*
+        Convert weights to numbers.
+
+        Blank / invalid values become 0.
+    */
+    const weights = entries.map(entry => {
+
+        const value = Number(entry.weight);
+
+        if (!Number.isFinite(value) || value < 0) {
+            return 0;
+        }
+
+        return value;
+    });
+
+
+    /*
+        Find the total positive weight.
+    */
+    const total = weights.reduce(
+        (sum, weight) => sum + weight,
+        0
+    );
+
+
+    /*
+        ==================================================
+        NO WEIGHTS
+        ==================================================
+
+        If nobody has a positive weight, choose every
+        entry equally.
+
+        cryptoRandomInt() makes the choice using
+        crypto.getRandomValues().
+    */
+    if (total <= 0) {
+
+        return cryptoRandomInt(entries.length);
+    }
+
+
+    /*
+        ==================================================
+        WEIGHTED MODE
+        ==================================================
+
+        Convert decimal weights to integer units.
+
+        Example:
+
+            2.5
+            7.5
+
+        becomes:
+
+            2500
+            7500
+    */
+
+    const SCALE = 1000;
+
+    const scaledWeights = weights.map(weight =>
+        Math.round(weight * SCALE)
+    );
+
+    const scaledTotal = scaledWeights.reduce(
+        (sum, weight) => sum + weight,
+        0
+    );
+
+
+    /*
+        Extremely tiny weights could round to zero.
+        If that somehow leaves us with no usable
+        probability, fall back to equal probability.
+    */
+    if (scaledTotal <= 0) {
+
+        return cryptoRandomInt(entries.length);
+    }
+
+
+    /*
+        Pick one integer from:
+
+            0 ... scaledTotal - 1
+    */
+    let random =
+        cryptoRandomInt(scaledTotal);
+
+
+    /*
+        Walk through the weighted ranges.
+    */
+    for (let i = 0; i < scaledWeights.length; i++) {
+
+        if (random < scaledWeights[i]) {
+            return i;
+        }
+
+        random -= scaledWeights[i];
+    }
+
+
+    /*
+        Safety fallback.
+    */
+    return scaledWeights.length - 1;
+}
+
+
+/*
+    ==================================================
+    GET ACTIVE ENTRIES
+    ==================================================
+
+    Entries with zero weight are excluded from the
+    wheel when weighted mode is active.
+
+    If nobody has a weight, all entries are active.
+*/
+function getActiveEntries() {
+
+    const hasPositiveWeight = entries.some(entry => {
+
+        const weight = Number(entry.weight);
+
+        return Number.isFinite(weight) && weight > 0;
+    });
+
+
+    if (!hasPositiveWeight) {
+        return entries.map((entry, index) => ({
+            entry,
+            originalIndex: index
+        }));
+    }
+
+
+    return entries
+        .map((entry, index) => ({
+            entry,
+            originalIndex: index
+        }))
+        .filter(item => {
+
+            const weight = Number(item.entry.weight);
+
+            return Number.isFinite(weight) && weight > 0;
+        });
+}
+
+
+/*
+    ==================================================
+    DRAW WHEEL
+    ==================================================
+*/
+function drawWheel() {
+
+    const width =
+        canvas.clientWidth;
+
+    const height =
+        canvas.clientHeight;
+
+    const center =
+        Math.min(width, height) / 2;
+
+    const radius =
+        center - 5;
+
+
+    /*
+        Clear using CSS-pixel coordinates.
+    */
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    /*
+        Center wheel in canvas.
+    */
+    const cx = width / 2;
+    const cy = height / 2;
+
+
+    const activeEntries =
+        getActiveEntries();
+
+
+    if (activeEntries.length === 0) {
+
+        ctx.fillStyle = "#333";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            cx,
+            cy,
+            radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        return;
+    }
+
+
+    /*
+        Determine whether this is weighted mode.
+    */
+    const weightedMode = entries.some(entry => {
+
+        const weight = Number(entry.weight);
+
+        return Number.isFinite(weight) && weight > 0;
+    });
+
+
+    let total;
+
+    if (weightedMode) {
+
+        total = activeEntries.reduce(
+            (sum, item) =>
+                sum + Number(item.entry.weight),
+            0
+        );
+
+    } else {
+
+        total = activeEntries.length;
+    }
+
+
+    let angle = rotation;
+
+
+    activeEntries.forEach(item => {
+
+        const entry =
+            item.entry;
+
+
+        let slice;
+
+
+        if (weightedMode) {
+
+            slice =
+                (Number(entry.weight) / total) *
+                Math.PI * 2;
+
+        } else {
+
+            slice =
+                (1 / total) *
+                Math.PI * 2;
+        }
+
+
+        /*
+            Draw slice.
+        */
+        ctx.beginPath();
+
+        ctx.moveTo(
+            cx,
+            cy
+        );
+
+        ctx.arc(
+            cx,
+            cy,
+            radius,
+            angle,
+            angle + slice
+        );
+
+        ctx.closePath();
+
+        ctx.fillStyle =
+            entry.color || "#777";
+
+        ctx.fill();
+
+
+        /*
+            Slice border.
+        */
+        ctx.strokeStyle = "#111";
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+
+
+        /*
+            Text.
+        */
+        const middle =
+            angle + slice / 2;
+
+        ctx.save();
+
+        ctx.translate(
+            cx,
+            cy
+        );
+
+        ctx.rotate(middle);
+
+        ctx.fillStyle = "white";
+
+        ctx.font =
+            "bold 16px system-ui";
+
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+
+        let name =
+            entry.name || "Unnamed";
+
+        if (name.length > 18) {
+            name =
+                name.slice(0, 16) + "…";
+        }
+
+
+        /*
+            Only draw text if the slice is large
+            enough to reasonably fit it.
+        */
+        if (slice > 0.08) {
+
+            ctx.fillText(
+                name,
+                radius - 15,
+                0
+            );
+        }
+
+
+        ctx.restore();
+
+
+        angle += slice;
+    });
+
+
+    /*
+        Center circle.
+    */
+    ctx.beginPath();
+
+    ctx.arc(
+        cx,
+        cy,
+        25,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fillStyle = "#111";
+
+    ctx.fill();
+}
+
+
+/*
+    ==================================================
+    HIGH-DPI CANVAS RESIZE
+    ==================================================
+*/
+function resizeCanvas() {
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+
+    canvas.width =
+        Math.round(rect.width * dpr);
+
+    canvas.height =
+        Math.round(rect.height * dpr);
+
+
+    /*
+        Draw using CSS pixels while keeping the
+        actual canvas high resolution.
+    */
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+
+    drawWheel();
+}
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+/*
+    ==================================================
+    SETTINGS UI
+    ==================================================
+*/
+function renderEntries() {
+
+    entriesDiv.innerHTML = "";
+
+
+    const total =
+        entries.reduce(
+            (sum, entry) => {
+
+                const weight =
+                    Number(entry.weight);
+
+                if (
+                    !Number.isFinite(weight) ||
+                    weight < 0
+                ) {
+                    return sum;
+                }
+
+                return sum + weight;
+
+            },
+            0
+        );
+
+
+    entries.forEach((entry, index) => {
+
+        const div =
+            document.createElement("div");
+
+        div.className = "entry";
+
+
+        /*
+            Entry number.
+        */
+        const number =
+            document.createElement("span");
+
+        number.textContent =
+            index + 1;
+
+
+        /*
+            Name input.
+        */
+        const name =
+            document.createElement("input");
+
+        name.value =
+            entry.name;
+
+        name.placeholder =
+            "Name";
+
+
+        name.addEventListener(
+            "input",
+            () => {
+
+                entry.name =
+                    name.value;
+
+                drawWheel();
+            }
+        );
+
+
+        /*
+            Weight input.
+        */
+        const weight =
+            document.createElement("input");
+
+        weight.type =
+            "number";
+
+        weight.min =
+            "0";
+
+        weight.step =
+            "0.1";
+
+        /*
+            Keep the input blank if the value is null.
+        */
+        weight.value =
+            entry.weight ?? "";
+
+        weight.placeholder =
+            "Weight";
+
+
+        weight.addEventListener(
+            "input",
+            () => {
+
+                /*
+                    Empty means no weight.
+                */
+                if (weight.value.trim() === "") {
+
+                    entry.weight = 0;
+
+                } else {
+
+                    const value =
+                        Number(weight.value);
+
+                    entry.weight =
+                        Number.isFinite(value) && value >= 0
+                            ? value
+                            : 0;
+                }
+
+
+                updatePercentageDisplay();
+
+                drawWheel();
+            }
+        );
+
+
+        /*
+            Color input.
+        */
+        const color =
+            document.createElement("input");
+
+        color.type =
+            "color";
+
+        color.value =
+            entry.color || "#777777";
+
+
+        color.addEventListener(
+            "input",
+            () => {
+
+                entry.color =
+                    color.value;
+
+                drawWheel();
+            }
+        );
+
+
+        /*
+            Remove button.
+        */
+        const remove =
+            document.createElement("button");
+
+        remove.textContent =
+            "×";
+
+        remove.className =
+            "remove";
+
+
+        remove.addEventListener(
+            "click",
+            () => {
+
+                if (entries.length <= 1) {
+                    return;
+                }
+
+                entries.splice(
+                    index,
+                    1
+                );
+
+                renderEntries();
+
+                drawWheel();
+            }
+        );
+
+
+        /*
+            Actual probability tooltip.
+        */
+        if (total > 0) {
+
+            const probability =
+                (
+                    (Number(entry.weight) || 0) /
+                    total
+                ) * 100;
+
+            weight.title =
+                probability.toFixed(2) +
+                "% probability";
+
+        } else {
+
+            weight.title =
+                "Equal probability";
+        }
+
+
+        div.appendChild(number);
+        div.appendChild(name);
+        div.appendChild(weight);
+        div.appendChild(color);
+        div.appendChild(remove);
+
+        entriesDiv.appendChild(div);
+    });
+
+
+    updatePercentageDisplay();
+}
+
+
+/*
+    ==================================================
+    TOTAL WEIGHT DISPLAY
+    ==================================================
+*/
+function updatePercentageDisplay() {
+
+    const total =
+        entries.reduce(
+            (sum, entry) => {
+
+                const weight =
+                    Number(entry.weight);
+
+                if (
+                    !Number.isFinite(weight) ||
+                    weight < 0
+                ) {
+                    return sum;
+                }
+
+                return sum + weight;
+
+            },
+            0
+        );
+
+
+    if (total <= 0) {
+
+        totalDisplay.textContent =
+            "none — equal probability";
+
+    } else {
+
+        totalDisplay.textContent =
+            total;
+    }
+}
+
+
+/*
+    ==================================================
+    ADD ENTRY
+    ==================================================
+*/
+document
+    .getElementById("add")
+    .addEventListener(
+        "click",
+        () => {
+
+            const colors = [
+                "#ff595e",
+                "#ffca3a",
+                "#8ac926",
+                "#1982c4",
+                "#6a4c93",
+                "#f72585",
+                "#4cc9f0",
+                "#7209b7",
+                "#fb5607",
+                "#8338ec"
+            ];
+
+
+            entries.push({
+
+                name:
+                    "New Entry",
+
+                /*
+                    New entries start with no
+                    meaningful weight.
+                */
+                weight:
+                    0,
+
+                color:
+                    colors[
+                        entries.length %
+                        colors.length
+                    ]
+            });
+
+
+            renderEntries();
+
+            drawWheel();
+        }
+    );
+
+
+/*
+    ==================================================
+    SPIN
+    ==================================================
+*/
+spinButton.addEventListener(
+    "click",
+    () => {
+
+        if (spinning) {
+            return;
+        }
+
+
+        if (entries.length === 0) {
+            return;
+        }
+
+
+        /*
+            Pick winner BEFORE the animation.
+
+            This is the actual crypto-random decision.
+        */
+        const winnerIndex =
+            chooseWinner();
+
+
+        if (
+            winnerIndex < 0 ||
+            winnerIndex >= entries.length
+        ) {
+
+            winnerDisplay.textContent =
+                "⚠️ No valid entries!";
+
+            return;
+        }
+
+
+        spinning = true;
+
+        spinButton.disabled =
+            true;
+
+        winnerDisplay.textContent =
+            "";
+
+
+        /*
+            ==================================================
+            FIND WINNER SLICE
+            ==================================================
+        */
+
+        const activeEntries =
+            getActiveEntries();
+
+
+        const winnerPosition =
+            activeEntries.findIndex(
+                item =>
+                    item.originalIndex === winnerIndex
+            );
+
+
+        /*
+            This should never happen, but protect
+            against inconsistent state.
+        */
+        if (winnerPosition < 0) {
+
+            spinning = false;
+
+            spinButton.disabled =
+                false;
+
+            return;
+        }
+
+
+        const weightedMode =
+            entries.some(entry => {
+
+                const weight =
+                    Number(entry.weight);
+
+                return (
+                    Number.isFinite(weight) &&
+                    weight > 0
+                );
+            });
+
+
+        let total;
+
+
+        if (weightedMode) {
+
+            total =
+                activeEntries.reduce(
+                    (sum, item) =>
+                        sum +
+                        Number(item.entry.weight),
+                    0
+                );
+
+        } else {
+
+            total =
+                activeEntries.length;
+        }
+
+
+        /*
+            Find the starting angle of the winner.
+        */
+        let startAngle = 0;
+
+
+        for (
+            let i = 0;
+            i < winnerPosition;
+            i++
+        ) {
+
+            const item =
+                activeEntries[i];
+
+
+            let slice;
+
+
+            if (weightedMode) {
+
+                slice =
+                    (
+                        Number(item.entry.weight) /
+                        total
+                    ) *
+                    Math.PI * 2;
+
+            } else {
+
+                slice =
+                    (1 / total) *
+                    Math.PI * 2;
+            }
+
+
+            startAngle += slice;
+        }
+
+
+        const winnerEntry =
+            activeEntries[winnerPosition];
+
+
+        let winnerSlice;
+
+
+        if (weightedMode) {
+
+            winnerSlice =
+                (
+                    Number(winnerEntry.entry.weight) /
+                    total
+                ) *
+                Math.PI * 2;
+
+        } else {
+
+            winnerSlice =
+                (1 / total) *
+                Math.PI * 2;
+        }
+
+
+        /*
+            Center of winner slice.
+        */
+        const targetMiddle =
+            startAngle +
+            winnerSlice / 2;
+
+
+        /*
+            Pointer is at the top:
+
+                -PI / 2
+        */
+        const targetRotation =
+            -Math.PI / 2 -
+            targetMiddle;
+
+
+        /*
+            Random number of extra rotations.
+
+            This randomness is ALSO generated with
+            crypto.getRandomValues().
+        */
+        const extraSpins =
+            5 +
+            cryptoRandomInt(4);
+
+
+        const startRotation =
+            rotation;
+
+
+        const finalRotation =
+            targetRotation +
+            extraSpins *
+            Math.PI *
+            2;
+
+
+        /*
+            Randomize animation duration slightly.
+        */
+        const duration =
+            4000 +
+            cryptoRandomInt(1500);
+
+
+        const startTime =
+            performance.now();
+
+
+        /*
+            ==================================================
+            ANIMATION
+            ==================================================
+        */
+        function animate(now) {
+
+            const elapsed =
+                now - startTime;
+
+
+            let progress =
+                Math.min(
+                    elapsed / duration,
+                    1
+                );
+
+
+            /*
+                Ease-out cubic.
+            */
+            progress =
+                1 -
+                Math.pow(
+                    1 - progress,
+                    3
+                );
+
+
+            rotation =
+                startRotation +
+                (
+                    finalRotation -
+                    startRotation
+                ) *
+                progress;
+
+
+            drawWheel();
+
+
+            if (elapsed < duration) {
+
+                requestAnimationFrame(
+                    animate
+                );
+
+            } else {
+
+                rotation =
+                    finalRotation;
+
+                drawWheel();
+
+
+                winnerDisplay.textContent =
+                    "🎉 " +
+                    (
+                        winnerEntry.entry.name ||
+                        "Unnamed"
+                    );
+
+
+                spinning =
+                    false;
+
+                spinButton.disabled =
+                    false;
+            }
+        }
+
+
+        requestAnimationFrame(
+            animate
+        );
+    }
+);
+
+
+/*
+    ==================================================
+    INITIALIZE
+    ==================================================
+*/
+renderEntries();
+
+
+setTimeout(
+    () => {
+        resizeCanvas();
+    },
+    0
+);
+
+</script>
+
+</body>
+</html>
+```
