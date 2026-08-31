@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Crypto Wheel Randomness Test</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: #111;
+        color: white;
+        font-family: system-ui, sans-serif;
+    }
+
+    .app {
+        width: min(100%, 950px);
+        margin: auto;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #999;
+        margin-top: 0;
+    }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 25px 0;
+    }
+
+    button {
+        border: none;
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    #run {
+        background: white;
+        color: #111;
+    }
+
+    #run:hover {
+        opacity: .85;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .stat {
+        background: #1d1d1d;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        color: #888;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .winner {
+        background: #1d1d1d;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .winner-title {
+        color: #aaa;
+        font-size: 14px;
+    }
+
+    #winnerName {
+        font-size: 35px;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .table-container {
+        background: #1d1d1d;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 13px;
+        text-align: left;
+        border-bottom: 1px solid #333;
+    }
+
+    th {
+        color: #aaa;
+        font-size: 13px;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    .bar-container {
+        width: 100%;
+        height: 10px;
+        background: #333;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .bar {
+        height: 100%;
+        border-radius: 10px;
+    }
+
+    .color-dot {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        margin-right: 7px;
+        vertical-align: middle;
+    }
+
+    .explanation {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 12px;
+        background: #181818;
+        color: #999;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 700px) {
+
+        .stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        table {
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            padding: 9px 6px;
+        }
+
+        .hide-mobile {
+            display: none;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>🔐 Crypto Randomness Test</h1>
+
+    <p class="subtitle">
+        10,000 independent selections using crypto.getRandomValues()
+    </p>
+
+
+    <div class="controls">
+
+        <button id="run">
+            ▶ Run 10,000 Spins
+        </button>
+
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="stat-value" id="spinCount">
+                0
+            </div>
+
+            <div class="stat-label">
+                Total Spins
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-value" id="winnerCount">
+                0
+            </div>
+
+            <div class="stat-label">
+                Most Wins
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-value" id="speed">
+                0
+            </div>
+
+            <div class="stat-label">
+                Spins / Second
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-value" id="mode">
+                —
+            </div>
+
+            <div class="stat-label">
+                Probability Mode
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="winner">
+
+        <div class="winner-title">
+            🏆 MOST FREQUENT RESULT
+        </div>
+
+        <div id="winnerName">
+            —
+        </div>
+
+    </div>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Wins</th>
+                    <th>Actual</th>
+                    <th>Expected</th>
+                    <th class="hide-mobile">
+                        Difference
+                    </th>
+                    <th class="hide-mobile">
+                        Distribution
+                    </th>
+                </tr>
+
+            </thead>
+
+            <tbody id="results">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div class="explanation">
+
+        <strong>How this test works:</strong><br><br>
+
+        Every "spin" performs a fresh
+        <code>crypto.getRandomValues()</code> call.
+        The test does not animate the wheel because that would
+        waste time; it tests the actual random-selection algorithm
+        directly.
+
+        <br><br>
+
+        If all weights are empty or zero, every entry has equal
+        probability.
+
+        If weights are supplied, the expected probability is based
+        on those weights.
+
+        <br><br>
+
+        With truly random results, the actual percentages will not
+        be exactly equal to the expected percentages. Small
+        differences are normal.
+    </div>
+
+</div>
+
+
+<script>
+
+/*
+    ==========================================================
+    CONFIGURATION
+    ==========================================================
+*/
+
+
+const TEST_SPINS = 10000;
+
+
+/*
+    This should match the entries from your wheel.
+
+    Change these to test different configurations.
+*/
+
+const entries = [
+
+    {
+        name: "Apple",
+        weight: 25,
+        color: "#ff595e"
+    },
+
+    {
+        name: "Banana",
+        weight: 25,
+        color: "#ffca3a"
+    },
+
+    {
+        name: "Grape",
+        weight: 25,
+        color: "#8ac926"
+    },
+
+    {
+        name: "Orange",
+        weight: 25,
+        color: "#1982c4"
+    }
+
+];
+
+
+/*
+    ==========================================================
+    CRYPTO RANDOM INTEGER
+    ==========================================================
+
+    Returns a random integer from:
+
+        0 ... max - 1
+
+    Rejection sampling prevents modulo bias.
+*/
+
+function cryptoRandomInt(max) {
+
+    if (max <= 0) {
+        throw new Error(
+            "max must be greater than zero"
+        );
+    }
+
+
+    const RANGE = 4294967296;
+
+
+    const limit =
+        Math.floor(RANGE / max) * max;
+
+
+    while (true) {
+
+        const random =
+            new Uint32Array(1);
+
+
+        crypto.getRandomValues(
+            random
+        );
+
+
+        const value =
+            random[0];
+
+
+        if (value < limit) {
+
+            return value % max;
+
+        }
+
+    }
+
+}
+
+
+/*
+    ==========================================================
+    WEIGHT PROCESSING
+    ==========================================================
+*/
+
+function getWeight(entry) {
+
+    const weight =
+        Number(entry.weight);
+
+
+    if (
+        !Number.isFinite(weight) ||
+        weight < 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    return weight;
+
+}
+
+
+function getWeights() {
+
+    return entries.map(
+        getWeight
+    );
+
+}
+
+
+/*
+    ==========================================================
+    RANDOM WINNER
+    ==========================================================
+*/
+
+function chooseWinner() {
+
+    const weights =
+        getWeights();
+
+
+    const total =
+        weights.reduce(
+            (a, b) => a + b,
+            0
+        );
+
+
+    /*
+        ==============================================
+        EQUAL PROBABILITY MODE
+        ==============================================
+    */
+
+    if (total <= 0) {
+
+        return cryptoRandomInt(
+            entries.length
+        );
+
+    }
+
+
+    /*
+        ==============================================
+        WEIGHTED MODE
+        ==============================================
+    */
+
+
+    /*
+        Convert weights to integer units.
+
+        1000 allows decimal weights such as:
+
+            1.5
+            2.25
+            7.75
+    */
+
+    const SCALE = 1000;
+
+
+    const scaled =
+        weights.map(
+            weight =>
+                Math.round(
+                    weight * SCALE
+                )
+        );
+
+
+    const scaledTotal =
+        scaled.reduce(
+            (a, b) => a + b,
+            0
+        );
+
+
+    if (scaledTotal <= 0) {
+
+        return cryptoRandomInt(
+            entries.length
+        );
+
+    }
+
+
+    let random =
+        cryptoRandomInt(
+            scaledTotal
+        );
+
+
+    for (
+        let i = 0;
+        i < scaled.length;
+        i++
+    ) {
+
+        if (
+            random <
+            scaled[i]
+        ) {
+
+            return i;
+
+        }
+
+
+        random -=
+            scaled[i];
+
+    }
+
+
+    return entries.length - 1;
+
+}
+
+
+/*
+    ==========================================================
+    TEST
+    ==========================================================
+*/
+
+function runTest() {
+
+    const counts =
+        entries.map(
+            () => 0
+        );
+
+
+    /*
+        Determine mode.
+    */
+
+    const weights =
+        getWeights();
+
+
+    const total =
+        weights.reduce(
+            (a, b) => a + b,
+            0
+        );
+
+
+    const equalMode =
+        total <= 0;
+
+
+    document.getElementById(
+        "mode"
+    ).textContent =
+        equalMode
+            ? "Equal"
+            : "Weighted";
+
+
+    /*
+        Start timer.
+    */
+
+    const start =
+        performance.now();
+
+
+    /*
+        ==============================================
+        RUN 10,000 SPINS
+        ==============================================
+    */
+
+    for (
+        let spin = 0;
+        spin < TEST_SPINS;
+        spin++
+    ) {
+
+        const winner =
+            chooseWinner();
+
+
+        counts[winner]++;
+
+    }
+
+
+    /*
+        Stop timer.
+    */
+
+    const elapsed =
+        performance.now() -
+        start;
+
+
+    const seconds =
+        elapsed / 1000;
+
+
+    const spinsPerSecond =
+        Math.round(
+            TEST_SPINS /
+            seconds
+        );
+
+
+    /*
+        Find most frequent winner.
+    */
+
+    let mostWins =
+        -1;
+
+    let winnerIndex =
+        -1;
+
+
+    for (
+        let i = 0;
+        i < counts.length;
+        i++
+    ) {
+
+        if (
+            counts[i] >
+            mostWins
+        ) {
+
+            mostWins =
+                counts[i];
+
+            winnerIndex =
+                i;
+
+        }
+
+    }
+
+
+    /*
+        Update top statistics.
+    */
+
+    document.getElementById(
+        "spinCount"
+    ).textContent =
+        TEST_SPINS.toLocaleString();
+
+
+    document.getElementById(
+        "winnerCount"
+    ).textContent =
+        mostWins.toLocaleString();
+
+
+    document.getElementById(
+        "speed"
+    ).textContent =
+        spinsPerSecond.toLocaleString();
+
+
+    document.getElementById(
+        "winnerName"
+    ).textContent =
+        winnerIndex >= 0
+            ? entries[winnerIndex].name
+            : "—";
+
+
+    /*
+        Build result table.
+    */
+
+    const results =
+        document.getElementById(
+            "results"
+        );
+
+
+    results.innerHTML = "";
+
+
+    /*
+        Expected probabilities.
+    */
+
+    let expected;
+
+
+    if (equalMode) {
+
+        expected =
+            entries.map(
+                () =>
+                    100 /
+                    entries.length
+            );
+
+    } else {
+
+        expected =
+            weights.map(
+                weight =>
+                    (
+                        weight /
+                        total
+                    ) * 100
+            );
+
+    }
+
+
+    /*
+        Sort results by number of wins.
+    */
+
+    const order =
+        entries.map(
+            (_, index) =>
+                index
+        );
+
+
+    order.sort(
+        (a, b) =>
+            counts[b] -
+            counts[a]
+    );
+
+
+    /*
+        Render table.
+    */
+
+    order.forEach(
+        (index, rank) => {
+
+            const entry =
+                entries[index];
+
+
+            const wins =
+                counts[index];
+
+
+            const actual =
+                (
+                    wins /
+                    TEST_SPINS
+                ) * 100;
+
+
+            const expectedPercent =
+                expected[index];
+
+
+            const difference =
+                actual -
+                expectedPercent;
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            /*
+                Rank.
+            */
+
+            const rankCell =
+                document.createElement(
+                    "td"
+                );
+
+            rankCell.textContent =
+                rank + 1;
+
+
+            /*
+                Name.
+            */
+
+            const nameCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            nameCell.innerHTML =
+                `
+                <span
+                    class="color-dot"
+                    style="background:${entry.color}"
+                ></span>
+                ${escapeHTML(entry.name)}
+                `;
+
+
+            /*
+                Wins.
+            */
+
+            const winsCell =
+                document.createElement(
+                    "td"
+                );
+
+            winsCell.textContent =
+                wins.toLocaleString();
+
+
+            /*
+                Actual.
+            */
+
+            const actualCell =
+                document.createElement(
+                    "td"
+                );
+
+            actualCell.textContent =
+                actual.toFixed(2) +
+                "%";
+
+
+            /*
+                Expected.
+            */
+
+            const expectedCell =
+                document.createElement(
+                    "td"
+                );
+
+            expectedCell.textContent =
+                expectedPercent.toFixed(2) +
+                "%";
+
+
+            /*
+                Difference.
+            */
+
+            const differenceCell =
+                document.createElement(
+                    "td"
+                );
+
+            const sign =
+                difference >= 0
+                    ? "+"
+                    : "";
+
+
+            differenceCell.textContent =
+                sign +
+                difference.toFixed(2) +
+                "%";
+
+
+            /*
+                Distribution bar.
+            */
+
+            const distributionCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            const barContainer =
+                document.createElement(
+                    "div"
+                );
+
+            barContainer.className =
+                "bar-container";
+
+
+            const bar =
+                document.createElement(
+                    "div"
+                );
+
+            bar.className =
+                "bar";
+
+
+            bar.style.width =
+                actual + "%";
+
+
+            bar.style.background =
+                entry.color;
+
+
+            barContainer.appendChild(
+                bar
+            );
+
+
+            distributionCell.appendChild(
+                barContainer
+            );
+
+
+            /*
+                Add cells.
+            */
+
+            row.appendChild(
+                rankCell
+            );
+
+            row.appendChild(
+                nameCell
+            );
+
+            row.appendChild(
+                winsCell
+            );
+
+            row.appendChild(
+                actualCell
+            );
+
+            row.appendChild(
+                expectedCell
+            );
+
+            row.appendChild(
+                differenceCell
+            );
+
+            row.appendChild(
+                distributionCell
+            );
+
+
+            results.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/*
+    ==========================================================
+    HTML ESCAPING
+    ==========================================================
+
+    Prevents entry names from being interpreted as HTML.
+*/
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/*
+    ==========================================================
+    BUTTON
+    ==========================================================
+*/
+
+document.getElementById(
+    "run"
+).addEventListener(
+    "click",
+    runTest
+);
+
+
+/*
+    Run once when the page opens.
+*/
+
+runTest();
+
+</script>
+
+</body>
+</html>
