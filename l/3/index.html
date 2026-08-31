@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Трекер Коварного Кристалла</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #09070d;
+      color: #f5efff;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 28px 20px 20px;
+      text-align: center;
+      background: linear-gradient(180deg, #171020, #09070d);
+      border-bottom: 1px solid #30253d;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 7vw, 48px);
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: #aaa0b8;
+      font-size: 15px;
+    }
+
+    .container {
+      width: min(1100px, calc(100% - 28px));
+      margin: 24px auto 50px;
+    }
+
+    .crystal-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #181020, #100b17);
+      border: 1px solid #4b3560;
+      border-radius: 24px;
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .crystal {
+      font-size: 72px;
+      line-height: 1;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 18px rgba(190, 90, 255, 0.45));
+    }
+
+    .total-label {
+      color: #aaa0b8;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .total {
+      font-size: clamp(48px, 12vw, 82px);
+      font-weight: 800;
+      margin: 2px 0;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #241a2e;
+      color: #d8b9ff;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .rooms {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    .room {
+      background: #120e17;
+      border: 1px solid #2e2536;
+      border-radius: 18px;
+      padding: 20px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .room:hover {
+      transform: translateY(-3px);
+      border-color: #594267;
+    }
+
+    .room-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .percentage {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .bar {
+      width: 100%;
+      height: 12px;
+      background: #28212e;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      transition: width 0.5s ease;
+      background: #9b5de5;
+    }
+
+    .room-status {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #aaa0b8;
+    }
+
+    .info {
+      margin-top: 24px;
+      padding: 18px;
+      background: #100c14;
+      border: 1px solid #29222f;
+      border-radius: 16px;
+      color: #9f95a8;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .error {
+      padding: 20px;
+      border-radius: 16px;
+      background: #261015;
+      border: 1px solid #6d2d39;
+      color: #ffb7c1;
+      text-align: center;
+    }
+
+    .updated {
+      margin-top: 12px;
+      color: #817687;
+      font-size: 12px;
+    }
+
+    @media (max-width: 500px) {
+      .crystal-card {
+        padding: 22px 16px;
+      }
+
+      .room {
+        padding: 17px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>💎 Коварный Кристалл</h1>
+    <div class="subtitle">
+      Отслеживание влияния на квартиру
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="crystal-card">
+      <div class="crystal">💎</div>
+
+      <div class="total-label">
+        Общее влияние на квартиру
+      </div>
+
+      <div class="total" id="totalInfluence">--%</div>
+
+      <div class="status" id="overallStatus">
+        Загрузка...
+      </div>
+
+      <div class="updated" id="updated">
+        Чтение stats.json...
+      </div>
+    </section>
+
+    <section class="rooms" id="rooms">
+      <!-- Комнаты создаются здесь -->
+    </section>
+
+    <div class="info">
+      <strong>Только для чтения</strong><br>
+      Этот сайт читает <code>stats.json</code>.
+      Изменить влияние Коварного Кристалла с этой страницы невозможно.
+      Значения изменяются только через исходный файл данных.
+    </div>
+
+  </main>
+
+  <script>
+    const REFRESH_INTERVAL = 5000;
+
+    function getStatus(value) {
+      if (value >= 100) {
+        return "☠️ ВЛАСТЬ КРИСТАЛЛА";
+      }
+
+      if (value >= 80) {
+        return "🟣 КРИТИЧЕСКОЕ ВЛИЯНИЕ";
+      }
+
+      if (value >= 60) {
+        return "🔴 ВЫСОКОЕ ВЛИЯНИЕ";
+      }
+
+      if (value >= 40) {
+        return "🟠 ЗНАЧИТЕЛЬНОЕ ВЛИЯНИЕ";
+      }
+
+      if (value >= 20) {
+        return "🟡 ПОДОЗРИТЕЛЬНАЯ АКТИВНОСТЬ";
+      }
+
+      return "🟢 МИНИМАЛЬНОЕ ВЛИЯНИЕ";
+    }
+
+    function clamp(value) {
+      return Math.max(0, Math.min(100, Number(value) || 0));
+    }
+
+    function formatRoomName(name) {
+      return name
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, letter => letter.toUpperCase());
+    }
+
+    async function loadStats() {
+      try {
+        const response = await fetch(
+          "stats.json?timestamp=" + Date.now(),
+          {
+            cache: "no-store"
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Не удалось загрузить stats.json");
+        }
+
+        const data = await response.json();
+
+        if (!data.rooms || typeof data.rooms !== "object") {
+          throw new Error(
+            "В stats.json отсутствует правильный объект rooms"
+          );
+        }
+
+        const rooms = data.rooms;
+        const values = Object.values(rooms).map(clamp);
+
+        const total =
+          values.length > 0
+            ? values.reduce((sum, value) => sum + value, 0) / values.length
+            : 0;
+
+        document.getElementById("totalInfluence").textContent =
+          total.toFixed(1) + "%";
+
+        document.getElementById("overallStatus").textContent =
+          getStatus(total);
+
+        document.getElementById("updated").textContent =
+          "Последняя проверка: " +
+          new Date().toLocaleTimeString("ru-RU");
+
+        const roomsContainer = document.getElementById("rooms");
+        roomsContainer.innerHTML = "";
+
+        Object.entries(rooms).forEach(([name, rawValue]) => {
+          const value = clamp(rawValue);
+
+          const room = document.createElement("div");
+          room.className = "room";
+
+          room.innerHTML = `
+            <div class="room-name">
+              ${escapeHTML(formatRoomName(name))}
+            </div>
+
+            <div class="percentage">
+              ${value.toFixed(0)}%
+            </div>
+
+            <div class="bar">
+              <div
+                class="bar-fill"
+                style="width: ${value}%"
+              ></div>
+            </div>
+
+            <div class="room-status">
+              ${escapeHTML(getStatus(value))}
+            </div>
+          `;
+
+          roomsContainer.appendChild(room);
+        });
+
+      } catch (error) {
+        console.error(error);
+
+        document.getElementById("totalInfluence").textContent = "--%";
+
+        document.getElementById("overallStatus").textContent =
+          "⚠️ ДАННЫЕ КРИСТАЛЛА НЕДОСТУПНЫ";
+
+        document.getElementById("updated").textContent =
+          "Не удалось прочитать stats.json";
+
+        document.getElementById("rooms").innerHTML = `
+          <div class="error">
+            <strong>💎 СВЯЗЬ С КРИСТАЛЛОМ ПОТЕРЯНА</strong><br><br>
+            Трекер не смог прочитать <code>stats.json</code>.
+            Убедитесь, что файл существует рядом с
+            <code>index.html</code> и содержит правильный JSON.
+          </div>
+        `;
+      }
+    }
+
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    loadStats();
+
+    setInterval(loadStats, REFRESH_INTERVAL);
+  </script>
+
+</body>
+</html>
