@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10152f">
+  <meta name="description" content="Молодой Гений — серия учебников для любознательных детей, которые хотят знать больше.">
+  <title>Молодой Гений — знания без границ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+    :root {
+      --navy:#10152f; --ink:#161a35; --muted:#69708c; --paper:#f7f8fc;
+      --purple:#7958ff; --cyan:#64e5e2; --lime:#d7fa70; --white:#fff;
+      --line:rgba(22,26,53,.1); --shadow:0 22px 70px rgba(25,31,73,.12);
+    }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; font-family:Manrope,system-ui,-apple-system,sans-serif; color:var(--ink); background:var(--paper); }
+    a { color:inherit; text-decoration:none; }
+    button { font:inherit; }
+    .wrap { width:min(1160px, calc(100% - 40px)); margin:auto; }
+    header { position:sticky; top:0; z-index:20; background:rgba(247,248,252,.86); backdrop-filter:blur(18px); border-bottom:1px solid rgba(22,26,53,.07); }
+    .nav { min-height:78px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:-.7px; font-size:19px; }
+    .brandmark { width:42px; height:42px; border-radius:14px; display:grid; place-items:center; background:var(--lime); color:var(--navy); font-size:24px; box-shadow:inset 0 0 0 1px rgba(16,21,47,.08); overflow:hidden; }
+    .brandmark img { width:100%; height:100%; object-fit:contain; display:none; }
+    .brandmark.has-image img { display:block; }
+    .brandmark.has-image span { display:none; }
+    .brand small { display:block; color:var(--muted); font-size:10px; letter-spacing:1.8px; font-weight:800; margin-top:2px; }
+    .navlinks { display:flex; gap:30px; color:#555d79; font-size:13px; font-weight:700; }
+    .navlinks a:hover { color:var(--purple); }
+    .navcta { border:0; cursor:pointer; border-radius:999px; background:var(--navy); color:white; padding:13px 19px; font-size:13px; font-weight:800; }
+    .hero { background:var(--navy); color:white; position:relative; overflow:hidden; }
+    .hero:before { content:""; position:absolute; width:570px; height:570px; border-radius:50%; background:radial-gradient(circle,rgba(121,88,255,.45),rgba(121,88,255,0) 68%); top:-260px; right:-60px; pointer-events:none; }
+    .hero:after { content:""; position:absolute; width:430px; height:430px; border-radius:50%; border:1px solid rgba(100,229,226,.18); right:12%; bottom:-330px; box-shadow:0 0 0 45px rgba(100,229,226,.025),0 0 0 90px rgba(100,229,226,.02); }
+    .hero-grid { min-height:610px; display:grid; grid-template-columns:1.02fr .98fr; gap:40px; align-items:center; padding-top:54px; padding-bottom:70px; position:relative; z-index:1; }
+    .eyebrow { display:inline-flex; align-items:center; gap:9px; border:1px solid rgba(255,255,255,.16); border-radius:999px; padding:9px 13px; color:#d9dcf0; font-size:11px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--lime); box-shadow:0 0 14px var(--lime); }
+    h1 { font-size:clamp(48px,6.5vw,82px); line-height:.99; letter-spacing:-5px; margin:27px 0 23px; font-weight:800; }
+    h1 span { color:var(--cyan); }
+    .hero-copy { max-width:520px; font-size:16px; line-height:1.85; color:#bfc4df; }
+    .hero-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:31px; }
+    .btn { display:inline-flex; justify-content:center; align-items:center; gap:10px; border-radius:999px; padding:16px 22px; font-weight:800; font-size:13px; transition:transform .2s, box-shadow .2s; }
+    .btn:hover { transform:translateY(-3px); }
+    .btn-lime { background:var(--lime); color:var(--navy); box-shadow:0 10px 28px rgba(215,250,112,.14); }
+    .btn-ghost { border:1px solid rgba(255,255,255,.2); color:white; }
+    .hero-note { margin-top:35px; display:flex; align-items:center; gap:12px; font-size:11px; color:#a6accb; }
+    .note-icon { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.1); color:var(--lime); font-size:17px; }
+    .showcase { min-height:440px; position:relative; display:grid; place-items:center; }
+    .orbit { position:absolute; width:min(100%,440px); aspect-ratio:1; border:1px solid rgba(255,255,255,.13); border-radius:50%; }
+    .orbit:before,.orbit:after { content:""; position:absolute; border:1px solid rgba(255,255,255,.09); border-radius:50%; inset:34px; }
+    .orbit:after { inset:72px; }
+    .book-stage { position:relative; width:min(100%,420px); height:420px; display:grid; place-items:center; }
+    .book-shadow { position:absolute; width:280px; height:38px; background:rgba(0,0,0,.3); filter:blur(23px); bottom:40px; border-radius:50%; }
+    .book-cover { width:250px; height:330px; position:relative; z-index:2; border-radius:8px 15px 15px 8px; overflow:hidden; transform:rotate(-7deg); background:linear-gradient(145deg,#b6ff75,#61e1d4 60%,#8b6bff); box-shadow:24px 28px 0 rgba(0,0,0,.14), 0 35px 65px rgba(0,0,0,.3); color:var(--navy); padding:24px 22px; display:flex; flex-direction:column; }
+    .book-cover:after { content:""; position:absolute; width:210px; height:210px; border-radius:50%; border:1px solid rgba(16,21,47,.18); right:-82px; bottom:-62px; box-shadow:0 0 0 20px rgba(16,21,47,.04),0 0 0 42px rgba(16,21,47,.04); }
+    .book-cover img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+    .book-cover.has-image img { display:block; }
+    .book-cover.has-image .cover-content { display:none; }
+    .cover-content { position:relative; z-index:1; }
+    .cover-mini { font-size:9px; font-weight:800; letter-spacing:2px; text-transform:uppercase; }
+    .cover-title { font-size:31px; line-height:.98; letter-spacing:-1.7px; font-weight:800; margin-top:38px; }
+    .cover-sub { margin-top:13px; font-size:11px; line-height:1.5; font-weight:700; max-width:155px; }
+    .cover-symbol { margin-top:auto; font-size:76px; line-height:1; font-weight:800; }
+    .float-tag { position:absolute; z-index:4; padding:13px 16px; border-radius:16px; font-size:11px; font-weight:800; box-shadow:var(--shadow); }
+    .tag-one { top:46px; right:2px; background:white; color:var(--navy); transform:rotate(5deg); }
+    .tag-two { left:-4px; bottom:67px; background:var(--lime); color:var(--navy); transform:rotate(-5deg); }
+    .spark { position:absolute; color:var(--cyan); font-size:27px; }
+    .spark.s1 { top:52px; left:55px; } .spark.s2 { right:30px; bottom:68px; font-size:38px; color:var(--lime); }
+    .stats { background:white; border-bottom:1px solid var(--line); }
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); padding:24px 0; }
+    .stat { padding:5px 25px; border-right:1px solid var(--line); }
+    .stat:first-child { padding-left:0; } .stat:last-child { border:0; }
+    .stat strong { font-size:20px; letter-spacing:-.7px; display:block; }
+    .stat span { color:var(--muted); font-size:12px; }
+    section.content { padding:100px 0; }
+    .section-top { display:flex; justify-content:space-between; gap:30px; align-items:end; margin-bottom:37px; }
+    .kicker { color:var(--purple); text-transform:uppercase; letter-spacing:2px; font-size:10px; font-weight:800; }
+    h2 { margin:12px 0 0; font-size:clamp(32px,4vw,49px); line-height:1.08; letter-spacing:-2.3px; }
+    .section-desc { max-width:360px; color:var(--muted); line-height:1.8; font-size:13px; }
+    .features { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .feature { padding:27px; min-height:220px; background:white; border:1px solid var(--line); border-radius:23px; transition:transform .2s,box-shadow .2s; }
+    .feature:hover { transform:translateY(-5px); box-shadow:var(--shadow); }
+    .feature-icon { width:48px; height:48px; display:grid; place-items:center; border-radius:16px; background:#f0edff; font-size:22px; }
+    .feature:nth-child(2) .feature-icon { background:#e0fbf7; } .feature:nth-child(3) .feature-icon { background:#f3fbdc; }
+    .feature h3 { margin:22px 0 9px; font-size:17px; letter-spacing:-.5px; }
+    .feature p { margin:0; font-size:12px; line-height:1.8; color:var(--muted); }
+    .books-section { background:#eeeff8; }
+    .book-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+    .book-card { background:white; border-radius:23px; padding:15px; border:1px solid rgba(22,26,53,.07); }
+    .book-art { height:245px; border-radius:15px; position:relative; overflow:hidden; display:grid; place-items:center; background:#dff9f3; }
+    .book-card:nth-child(2) .book-art { background:#e8e2ff; }
+    .book-card:nth-child(3) .book-art { background:#f2f7d9; }
+    .book-art img { width:100%; height:100%; object-fit:contain; display:none; }
+    .book-art.has-image img { display:block; }
+    .book-art.has-image .placeholder { display:none; }
+    .placeholder { width:145px; height:190px; border-radius:5px 10px 10px 5px; padding:16px; background:linear-gradient(150deg,#6ee7d5,#a8f49b); color:var(--navy); box-shadow:12px 14px 0 rgba(16,21,47,.12); transform:rotate(-5deg); }
+    .book-card:nth-child(2) .placeholder { background:linear-gradient(150deg,#b9a8ff,#f6b8f0); transform:rotate(4deg); }
+    .book-card:nth-child(3) .placeholder { background:linear-gradient(150deg,#d7fa70,#ffdf8e); transform:rotate(-3deg); }
+    .placeholder b { display:block; font-size:18px; line-height:1.05; letter-spacing:-.8px; margin-top:22px; }
+    .placeholder small { font-size:8px; font-weight:800; letter-spacing:1px; }
+    .book-info { padding:18px 8px 8px; }
+    .book-label { color:var(--purple); font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.3px; }
+    .book-info h3 { font-size:18px; margin:8px 0; letter-spacing:-.6px; }
+    .book-info p { color:var(--muted); font-size:12px; line-height:1.7; margin:0 0 15px; }
+    .text-link { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:800; color:var(--navy); }
+    .text-link:hover { color:var(--purple); }
+    .upload-hint { margin-top:20px; color:var(--muted); font-size:11px; line-height:1.7; }
+    .cta-panel { background:var(--navy); color:white; border-radius:30px; padding:52px; display:flex; justify-content:space-between; align-items:center; gap:30px; position:relative; overflow:hidden; }
+    .cta-panel:after { content:"✳"; position:absolute; right:27%; top:-50px; font-size:180px; color:rgba(100,229,226,.07); pointer-events:none; }
+    .cta-panel h2 { max-width:580px; position:relative; z-index:1; }
+    .cta-panel p { color:#bfc4df; max-width:490px; font-size:13px; line-height:1.8; }
+    .cta-panel .btn { position:relative; z-index:1; white-space:nowrap; }
+    footer { padding:30px 0; color:var(--muted); font-size:11px; }
+    .footer-row { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .footer-brand { font-weight:800; color:var(--ink); font-size:14px; }
+    .upload-tools { display:flex; flex-wrap:wrap; gap:8px; margin-top:15px; }
+    .upload-tools label { cursor:pointer; display:inline-flex; align-items:center; gap:7px; border:1px dashed rgba(255,255,255,.28); color:#e2e5f7; padding:9px 12px; border-radius:12px; font-size:10px; font-weight:700; }
+    .upload-tools input { display:none; }
+    @media (max-width:850px) {
+      .navlinks { display:none; } .hero-grid { grid-template-columns:1fr; padding-top:60px; gap:10px; }
+      .hero-copy { max-width:650px; } .showcase { min-height:390px; } .book-stage { height:390px; }
+      .section-top { display:block; } .section-desc { margin-top:18px; } .features,.book-grid { grid-template-columns:1fr 1fr; }
+      .feature:last-child,.book-card:last-child { grid-column:span 2; }
+      .cta-panel { padding:36px; display:block; } .cta-panel .btn { margin-top:15px; }
+    }
+    @media (max-width:560px) {
+      .wrap { width:min(100% - 28px,1160px); } .nav { min-height:68px; } .brand { font-size:16px; }
+      .navcta { padding:11px 13px; font-size:11px; } h1 { letter-spacing:-3px; font-size:55px; }
+      .hero-grid { padding-top:45px; } .showcase { min-height:340px; } .book-stage { height:340px; }
+      .book-cover { width:205px; height:275px; padding:18px; } .cover-title { font-size:26px; margin-top:27px; }
+      .cover-symbol { font-size:60px; } .tag-one { right:0; top:20px; } .tag-two { bottom:34px; }
+      .stats-grid { grid-template-columns:1fr; gap:14px; padding:20px 0; } .stat,.stat:first-child { border-right:0; border-bottom:1px solid var(--line); padding:0 0 13px; }
+      .stat:last-child { border:0; padding-bottom:0; } section.content { padding:70px 0; }
+      .features,.book-grid { grid-template-columns:1fr; } .feature:last-child,.book-card:last-child { grid-column:auto; }
+      .cta-panel { padding:28px 23px; border-radius:23px; } .footer-row { align-items:flex-start; flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#home" aria-label="Молодой Гений — на главную">
+      <span class="brandmark" id="brandMark"><img id="logoImg" alt="Логотип Молодой Гений"><span>МГ</span></span>
+      <span>Молодой Гений<small>ЗНАНИЯ БЕЗ ГРАНИЦ</small></span>
+    </a>
+    <nav class="navlinks" aria-label="Основная навигация">
+      <a href="#about">О серии</a><a href="#books">Учебники</a><a href="#approach">Наш подход</a>
+    </nav>
+    <a class="navcta" href="#books">Смотреть учебники ↗</a>
+  </div>
+</header>
+<main id="home">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> Для тех, кто хочет знать больше</div>
+        <h1>Думай<br>шире.<br><span>Открывай</span><br>больше.</h1>
+        <p class="hero-copy">«Молодой Гений» — серия учебников для любознательных детей, которые не боятся сложных вопросов, любят искать ответы и готовы выйти за рамки обычной программы.</p>
+        <div class="hero-actions">
+          <a class="btn btn-lime" href="#books">Открыть коллекцию <span>↗</span></a>
+          <a class="btn btn-ghost" href="#about">Узнать о серии</a>
+        </div>
+        <div class="hero-note"><span class="note-icon">✦</span><span>Смелые вопросы. Глубокие знания. Большие идеи.</span></div>
+      </div>
+      <div class="showcase" aria-label="Обложка учебника Молодой Гений">
+        <div class="orbit"></div><span class="spark s1">✳</span><span class="spark s2">✦</span>
+        <div class="book-stage">
+          <div class="book-shadow"></div>
+          <div class="book-cover" id="heroCover">
+            <img id="heroBookImg" alt="Обложка учебника">
+            <div class="cover-content"><div class="cover-mini">Серия учебников</div><div class="cover-title">МОЛОДОЙ<br>ГЕНИЙ</div><div class="cover-sub">Знания, которые открывают новые миры.</div><div class="cover-symbol">✳</div></div>
+          </div>
+          <div class="float-tag tag-one">⚡ МЫСЛИ СМЕЛО</div>
+          <div class="float-tag tag-two">ИДЕИ → ОТКРЫТИЯ</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="stats">
+    <div class="wrap stats-grid">
+      <div class="stat"><strong>Больше, чем учебник</strong><span>Материал для настоящего любопытства</span></div>
+      <div class="stat"><strong>Учись исследовать</strong><span>Разбирайся, рассуждай, находи связи</span></div>
+      <div class="stat"><strong>Твой следующий уровень</strong><span>Для умов, которым всегда интересно</span></div>
+    </div>
+  </div>
+  <section class="content" id="about">
+    <div class="wrap">
+      <div class="section-top">
+        <div><div class="kicker">Философия серии</div><h2>Не просто выучить.<br>По-настоящему понять.</h2></div>
+        <p class="section-desc">Мы верим, что сильное образование начинается с вопроса «почему?». «Молодой Гений» помогает превратить интерес к миру в настоящее понимание.</p>
+      </div>
+      <div class="features" id="approach">
+        <article class="feature"><div class="feature-icon">🧠</div><h3>Думать самостоятельно</h3><p>Не только запоминать факты, но и анализировать, сравнивать, строить гипотезы и делать собственные выводы.</p></article>
+        <article class="feature"><div class="feature-icon">🔭</div><h3>Исследовать глубже</h3><p>Заглядывать за пределы стандартной программы и находить неожиданные связи между разными темами.</p></article>
+        <article class="feature"><div class="feature-icon">🚀</div><h3>Расти с интересом</h3><p>Сложные идеи становятся увлекательными задачами, а каждый найденный ответ открывает новые вопросы.</p></article>
+      </div>
+    </div>
+  </section>
+  <section class="content books-section" id="books">
+    <div class="wrap">
+      <div class="section-top">
+        <div><div class="kicker">Коллекция</div><h2>Учебники для<br>больших идей.</h2></div>
+        <p class="section-desc">Познакомьтесь с серией «Молодой Гений». Добавьте реальные обложки книг, чтобы представить свою коллекцию так, как она заслуживает.</p>
+      </div>
+      <div class="book-grid">
+        <article class="book-card">
+          <div class="book-art" id="art1"><img id="bookImg1" alt="Обложка первого учебника"><div class="placeholder"><small>МОЛОДОЙ ГЕНИЙ</small><b>Мир<br>знаний</b></div></div>
+          <div class="book-info"><div class="book-label">Учебная серия · 01</div><h3>Открой новую тему</h3><p>Добавьте название, предмет и описание первого учебника.</p><a class="text-link" href="#contact">Подробнее <span>↗</span></a></div>
+        </article>
+        <article class="book-card">
+          <div class="book-art" id="art2"><img id="bookImg2" alt="Обложка второго учебника"><div class="placeholder"><small>МОЛОДОЙ ГЕНИЙ</small><b>Думай<br>смелее</b></div></div>
+          <div class="book-info"><div class="book-label">Учебная серия · 02</div><h3>Решай сложное</h3><p>Добавьте название, предмет и описание второго учебника.</p><a class="text-link" href="#contact">Подробнее <span>↗</span></a></div>
+        </article>
+        <article class="book-card">
+          <div class="book-art" id="art3"><img id="bookImg3" alt="Обложка третьего учебника"><div class="placeholder"><small>МОЛОДОЙ ГЕНИЙ</small><b>Создавай<br>будущее</b></div></div>
+          <div class="book-info"><div class="book-label">Учебная серия · 03</div><h3>Иди дальше</h3><p>Добавьте название, предмет и описание третьего учебника.</p><a class="text-link" href="#contact">Подробнее <span>↗</span></a></div>
+        </article>
+      </div>
+      <p class="upload-hint">💡 Подсказка: чтобы заменить изображения, откройте этот файл в редакторе и укажите путь к файлу в атрибуте <code>src</code> у нужного изображения. Например: <code>images/logo.png</code> или <code>images/book-1.jpg</code>.</p>
+    </div>
+  </section>
+  <section class="content" id="contact">
+    <div class="wrap">
+      <div class="cta-panel">
+        <div><div class="kicker" style="color:var(--cyan)">Твой потенциал — без границ</div><h2>Любопытство — начало великих открытий.</h2><p>«Молодой Гений» — для тех, кто задаёт вопросы, ищет ответы и хочет понимать больше каждый день.</p></div>
+        <a class="btn btn-lime" href="#books">Выбрать учебник ↗</a>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="wrap footer-row"><div><div class="footer-brand">Молодой Гений ✳</div><div style="margin-top:5px">Учись. Исследуй. Создавай.</div></div><div>© <span id="year"></span> Молодой Гений · Образование для любознательных</div></div>
+</footer>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  // To add your own logo or book covers, replace the empty src values in the HTML with your image paths.
+  // Example: src="images/logo.png", src="images/cover-main.jpg", src="images/book-1.jpg"
+  function activateImage(imgId, parentId) {
+    const img = document.getElementById(imgId);
+    const parent = document.getElementById(parentId);
+    if (img && img.getAttribute('src')) {
+      img.addEventListener('load', () => parent.classList.add('has-image'));
+      img.addEventListener('error', () => parent.classList.remove('has-image'));
+      if (img.complete && img.naturalWidth) parent.classList.add('has-image');
+    }
+  }
+  activateImage('logoImg','brandMark');
+  activateImage('heroBookImg','heroCover');
+  activateImage('bookImg1','art1');
+  activateImage('bookImg2','art2');
+  activateImage('bookImg3','art3');
+</script>
+</body>
+</html>
